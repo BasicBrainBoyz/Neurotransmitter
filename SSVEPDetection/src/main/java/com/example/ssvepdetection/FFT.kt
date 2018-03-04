@@ -1,5 +1,11 @@
+package com.example.ssvepdetection
+
 /**
- * Created by liaml on 3/3/2018.
+ *
+ * Original Code by RosettaCode, Last Modified on 11/2/2018.:
+ * https://rosettacode.org/wiki/Fast_Fourier_transform#Kotlin
+ *
+ * Code updated by BBB ltd. on 3/4/2018
  */
 object FFT {
     fun fft(a: Array<Complex>) = _fft(a, Complex(0.0, 2.0), 1.0)
@@ -10,7 +16,7 @@ object FFT {
                 a
             else {
                 val n = a.size
-                require(n % 2 == 0, { "The Cooley-Tukey FFT algorithm only works when the length of the input is even." })
+                require(n % 2 == 0, { "The Cooley-Tukey com.example.ssvepdetection.FFT algorithm only works when the length of the input is even." })
 
                 var (evens, odds) = Pair(emptyArray<Complex>(), emptyArray<Complex>())
                 for (i in a.indices)
@@ -28,4 +34,12 @@ object FFT {
                 for ((l, r) in pairs) { left += l; right += r }
                 left + right
             }
+
+    fun prepData(data: DoubleArray, numPoints: Int): Array<Complex>{
+        //returns an complex array of size numPoints.
+        //for points greater than size of data, uses a zero to pad out the data
+        return Array(numPoints, {i -> if (i <= data.size) Complex(data[i],0.0) else Complex(0.0,0.0) })
+    }
 }
+
+class InvalidFFTLength(override var message:String): Exception(message)
