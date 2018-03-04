@@ -38,7 +38,7 @@ object FFT {
     fun prepData(data: DoubleArray, numPoints: Int): Array<Complex>{
         //returns an complex array of size numPoints.
         //for points greater than size of data, uses a zero to pad out the data
-        return Array(numPoints, {i -> if (i <= data.size) Complex(data[i],0.0) else Complex(0.0,0.0) })
+        return Array(numPoints, {i -> if (i < data.size) Complex(data[i],0.0) else Complex(0.0,0.0) })
     }
 }
 

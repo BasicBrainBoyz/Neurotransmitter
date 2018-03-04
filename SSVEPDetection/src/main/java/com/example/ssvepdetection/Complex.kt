@@ -11,11 +11,13 @@ import java.lang.Math.*
 
 
 class Complex(val re: Double, val im: Double) {
+
     operator infix fun plus(x: Complex) = Complex(re + x.re, im + x.im)
     operator infix fun minus(x: Complex) = Complex(re - x.re, im - x.im)
     operator infix fun times(x: Double) = Complex(re * x, im * x)
     operator infix fun times(x: Complex) = Complex(re * x.re - im * x.im, re * x.im + im * x.re)
     operator infix fun div(x: Double) = Complex(re / x, im / x)
+
     val exp: Complex by lazy { Complex(cos(im), sin(im)) * (cosh(re) + sinh(re)) }
     val mag: Double by lazy {Math.sqrt(Math.pow(re,2.0) + Math.pow(im,2.0))}
 
