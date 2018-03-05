@@ -33,7 +33,7 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
 
     }
 
-    fun analyzeSample(data: DoubleArray): Double{
+    fun analyzeSample(data: DoubleArray): Array<Boolean>{
         require(data.size == this.WinSize, {"Data size does not match the required size"})
 
         //Padding zeros and converting to complex
@@ -53,7 +53,7 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
         //what to do with FFT result
         if (this.state == DetectorState.BASELINE) {
             calcCF(freqStrength, fftMean)
-            return 0.0
+            return Array(this.FreqCF.size, {i -> false})
         }  else  {
             return findFreq(freqStrength, fftMean)
         }
@@ -68,10 +68,12 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
         }
 
     }
-    private fun findFreq(strengths: DoubleArray, average: Double): Double {
+    private fun findFreq(strengths: DoubleArray, average: Double): Array<Boolean> {
         var bestScore = 0.0
         var bestIndex = 1
         var score: Double
+
+        var result = Array(this.FreqCF.size, {i -> false})
 
         //find best score
         for (i in strengths.indices){
@@ -84,9 +86,10 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
 
         //is best strength big enough?
         if (bestScore < strengths.average()) {
-            return 0.0
+            return result //all false
         } else {
-            return this.targetFreqs[bestIndex]
+            result[bestIndex] = true
+            return result
         }
 
 
