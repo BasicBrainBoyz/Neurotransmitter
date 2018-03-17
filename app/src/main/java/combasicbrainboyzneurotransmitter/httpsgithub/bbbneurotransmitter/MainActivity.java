@@ -3,10 +3,18 @@ package combasicbrainboyzneurotransmitter.httpsgithub.bbbneurotransmitter;
 import android.content.res.Configuration;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import combasicbrainboyzneurotransmitter.httpsgithub.bbbneurotransmitter.views.StimuliView;
+import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +40,13 @@ public class MainActivity extends AppCompatActivity {
                 mStimuliView.stimuliFlashing();
             }
         }, delay, period);
+
+    }
+
+    /** Called when the user taps the Send button */
+    public void sendMessage(View view) {
+        Intent intent = new Intent(this, BTActivity.class);
+        startActivity(intent);
     }
 
     @Override
