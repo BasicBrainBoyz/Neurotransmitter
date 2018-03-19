@@ -1,10 +1,10 @@
 package com.example.ssvepdetection
 
-class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val WinSize: Int, private var fftNumPoints: Int) {
+class SSVEPDetector(val targetFreqs: Array<Float>, SampRate: Float, private val WinSize: Int, private var fftNumPoints: Int) {
 
     var state = DetectorState.BASELINE
     private var freqIndex: Array<Int>
-    private var FreqCF: DoubleArray
+    private var FreqCF: Array<Float>
     private var BLSampCount = 0
 
     //checking window size and fft size values
@@ -23,17 +23,17 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
 
     //Finding target frequencies indexes in the FFT output
     init {
-        val maxFreq = SampRate/2.0
+        val maxFreq = SampRate/2.0f
 
         // the second harmonic of all targets must be less than maxFreq
         require(targetFreqs.all( {freq -> 2*freq < maxFreq}), {"The second harmonic of all targets must be less than half the sample rate"})
 
         freqIndex = Array(targetFreqs.size, {i -> (targetFreqs[i]/maxFreq*fftNumPoints).toInt()})
-        FreqCF = DoubleArray(targetFreqs.size, {i -> 0.0})
+        FreqCF = Array<Float>(targetFreqs.size, {i -> 0.0f})
 
     }
 
-    fun analyzeSample(data: DoubleArray): Array<Boolean>{
+    fun analyzeSample(data: Array<Float>): Array<Boolean>{
         require(data.size == this.WinSize, {"Data size does not match the required size"})
 
         //Padding zeros and converting to complex
@@ -41,13 +41,13 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
 
         //Taking the FFt
         val Hdata = FFT.fft(dataPad)
-        val Hmag = DoubleArray(Hdata.size, {i-> Hdata[i].mag})
+        val Hmag = Array<Float>(Hdata.size, {i-> Hdata[i].mag})
 
         //measuring targetFreq strengths
-        val freqStrength: DoubleArray
-        freqStrength = DoubleArray(this.targetFreqs.size, { i -> Hmag[this.freqIndex[i]] + Hmag[2*this.freqIndex[i]]})
+        val freqStrength: Array<Float>
+        freqStrength = Array<Float>(this.targetFreqs.size, { i -> Hmag[this.freqIndex[i]] + Hmag[2*this.freqIndex[i]]})
 
-        val fftMean: Double
+        val fftMean: Float
         fftMean = Hmag.average()
 
         //what to do with FFT result
@@ -59,7 +59,7 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
         }
     }
 
-    private fun calcCF(strengths: DoubleArray, average: Double){
+    private fun calcCF(strengths: Array<Float>, average: Float){
 
         for ( i in this.targetFreqs.indices){
             //running average of CF
@@ -68,10 +68,10 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
         }
 
     }
-    private fun findFreq(strengths: DoubleArray, average: Double): Array<Boolean> {
-        var bestScore = 0.0
+    private fun findFreq(strengths: Array<Float>, average: Float): Array<Boolean> {
+        var bestScore = 0.0f
         var bestIndex = 1
-        var score: Double
+        var score: Float
 
         var result = Array(this.FreqCF.size, {i -> false})
 
