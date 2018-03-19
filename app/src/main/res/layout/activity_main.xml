@@ -7,20 +7,109 @@
     tools:context="combasicbrainboyzneurotransmitter.httpsgithub.bbbneurotransmitter.MainActivity">
 
     <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello Liam!"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="128dp"
+        android:layout_marginTop="20dp"
+        android:text="Currently Playing: _________________________________"
+        android:textColor="#ff69b4"
+        android:textSize="22dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.054" />
 
-    <combasicbrainboyzneurotransmitter.httpsgithub.bbbneurotransmitter.views.StimuliView
-        android:id="@+id/stimuliView"
-        android:layout_width="match_parent"
-        android:layout_height="151dp"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="161dp" />
+    <TextView
+        android:id="@+id/info_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="98dp"
+        android:layout_marginTop="50dp"
+        android:text="Testing Info Log..."
+        android:textColor="#ff69b4"
+        android:textSize="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.054" />
+
+    <ImageView
+        android:id="@+id/stimuli_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/left_stimuli"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/stimuli_middle" />
+
+    <ImageView
+        android:id="@+id/stimuli_middle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/middle_stimuli"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintLeft_toRightOf="@id/stimuli_left"
+        app:layout_constraintRight_toLeftOf="@id/stimuli_right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/stimuli_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/right_stimuli"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintLeft_toRightOf="@id/stimuli_middle"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/skip_fwd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/track_next"
+        android:layout_marginBottom="180dp"
+        app:layout_constraintLeft_toLeftOf="@id/stimuli_right"
+        app:layout_constraintRight_toRightOf="@id/stimuli_right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/track_play"
+        android:layout_marginBottom="180dp"
+        app:layout_constraintLeft_toLeftOf="@id/stimuli_middle"
+        app:layout_constraintRight_toRightOf="@id/stimuli_middle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/track_pause"
+        android:layout_marginBottom="180dp"
+        app:layout_constraintLeft_toLeftOf="@id/stimuli_middle"
+        app:layout_constraintRight_toRightOf="@id/stimuli_middle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/skip_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/track_back"
+        android:layout_marginBottom="180dp"
+        app:layout_constraintLeft_toLeftOf="@id/stimuli_left"
+        app:layout_constraintRight_toRightOf="@id/stimuli_left"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+
 
 </android.support.constraint.ConstraintLayout>

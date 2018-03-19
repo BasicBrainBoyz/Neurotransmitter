@@ -1,0 +1,8 @@
+<objectAnimator
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="1000"
+    android:propertyName="fillColor"
+    android:valueFrom="#FF000000"
+    android:valueTo="#FFFFFFFF"
+    android:repeatCount="1"
+    android:interpolator="@android:anim/linear_interpolator" />

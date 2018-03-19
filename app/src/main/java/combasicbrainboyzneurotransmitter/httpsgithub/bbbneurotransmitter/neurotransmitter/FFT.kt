@@ -1,4 +1,4 @@
-package com.example.ssvepdetection
+package combasicbrainboyzneurotransmitter.httpsgithub.bbbneurotransmitter.neurotransmitter
 
 /**
  *
@@ -9,10 +9,10 @@ package com.example.ssvepdetection
  */
 
 object FFT {
-    fun fft(a: Array<Complex>) = _fft(a, Complex(0.0f, 2.0f), 1.0f)
-    fun inverseFFT(a: Array<Complex>) = _fft(a, Complex(0.0f, -2.0f), 2.0f)
+    fun fft(a: Array<Complex>) = _fft(a, Complex(0.0, 2.0), 1.0)
+    fun inverseFFT(a: Array<Complex>) = _fft(a, Complex(0.0, -2.0), 2.0)
 
-    private fun _fft(a: Array<Complex>, direction: Complex, scalar: Float): Array<Complex> =
+    private fun _fft(a: Array<Complex>, direction: Complex, scalar: Double): Array<Complex> =
             if (a.size == 1)
                 a
             else {
@@ -27,7 +27,7 @@ object FFT {
                 odds = _fft(odds, direction, scalar)
 
                 val pairs = (0 until n / 2).map {
-                    val offset = (direction * (kotlin.math.PI.toFloat() * it / n)).exp * odds[it] / scalar
+                    val offset = (direction * (java.lang.Math.PI * it / n)).exp * odds[it] / scalar
                     val base = evens[it] / scalar
                     Pair(base + offset, base - offset)
                 }
@@ -36,10 +36,10 @@ object FFT {
                 left + right
             }
 
-    fun prepData(data: Array<Float>, numPoints: Int): Array<Complex>{
+    fun prepData(data: DoubleArray, numPoints: Int): Array<Complex>{
         //returns an complex array of size numPoints.
         //for points greater than size of data, uses a zero to pad out the data
-        return Array(numPoints, {i -> if (i < data.size) Complex(data[i],0.0f) else Complex(0.0f,0.0f) })
+        return Array(numPoints, {i -> if (i < data.size) Complex(data[i],0.0) else Complex(0.0,0.0) })
     }
 }
 

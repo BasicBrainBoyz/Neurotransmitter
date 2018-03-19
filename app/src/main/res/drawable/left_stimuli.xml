@@ -1,0 +1,9 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/stimuli1">
+
+    <target
+        android:animation="@animator/twelve_hz_blink"
+        android:name="stimuliOne" />
+
+</animated-vector>
