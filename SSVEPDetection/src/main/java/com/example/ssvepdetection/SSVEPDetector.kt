@@ -1,10 +1,10 @@
 package com.example.ssvepdetection
 
-class SSVEPDetector(val targetFreqs: Array<Float>, SampRate: Float, private val WinSize: Int, private var fftNumPoints: Int) {
+class SSVEPDetector(val targetFreqs: FloatArray, SampRate: Float, private val WinSize: Int, private var fftNumPoints: Int) {
 
     var state = DetectorState.BASELINE
     private var freqIndex: Array<Int>
-    private var FreqCF: Array<Float>
+    private var FreqCF: FloatArray
     private var BLSampCount = 0
 
     //checking window size and fft size values
@@ -29,11 +29,11 @@ class SSVEPDetector(val targetFreqs: Array<Float>, SampRate: Float, private val 
         require(targetFreqs.all( {freq -> 2*freq < maxFreq}), {"The second harmonic of all targets must be less than half the sample rate"})
 
         freqIndex = Array(targetFreqs.size, {i -> (targetFreqs[i]/maxFreq*fftNumPoints).toInt()})
-        FreqCF = Array<Float>(targetFreqs.size, {i -> 0.0f})
+        FreqCF = FloatArray(targetFreqs.size, {i -> 0.0f})
 
     }
 
-    fun analyzeSample(data: Array<Float>): Array<Boolean>{
+    fun analyzeSample(data: FloatArray): Array<Boolean>{
         require(data.size == this.WinSize, {"Data size does not match the required size"})
 
         //Padding zeros and converting to complex
@@ -41,14 +41,14 @@ class SSVEPDetector(val targetFreqs: Array<Float>, SampRate: Float, private val 
 
         //Taking the FFt
         val Hdata = FFT.fft(dataPad)
-        val Hmag = Array<Float>(Hdata.size, {i-> Hdata[i].mag})
+        val Hmag = FloatArray(Hdata.size, {i-> Hdata[i].mag})
 
         //measuring targetFreq strengths
-        val freqStrength: Array<Float>
-        freqStrength = Array<Float>(this.targetFreqs.size, { i -> Hmag[this.freqIndex[i]] + Hmag[2*this.freqIndex[i]]})
+        val freqStrength: FloatArray
+        freqStrength = FloatArray(this.targetFreqs.size, { i -> Hmag[this.freqIndex[i]] + Hmag[2*this.freqIndex[i]]})
 
         val fftMean: Float
-        fftMean = Hmag.average()
+        fftMean = Hmag.average().toFloat()
 
         //what to do with FFT result
         if (this.state == DetectorState.BASELINE) {
@@ -59,7 +59,7 @@ class SSVEPDetector(val targetFreqs: Array<Float>, SampRate: Float, private val 
         }
     }
 
-    private fun calcCF(strengths: Array<Float>, average: Float){
+    private fun calcCF(strengths: FloatArray, average: Float){
 
         for ( i in this.targetFreqs.indices){
             //running average of CF
@@ -68,7 +68,7 @@ class SSVEPDetector(val targetFreqs: Array<Float>, SampRate: Float, private val 
         }
 
     }
-    private fun findFreq(strengths: Array<Float>, average: Float): Array<Boolean> {
+    private fun findFreq(strengths: FloatArray, average: Float): Array<Boolean> {
         var bestScore = 0.0f
         var bestIndex = 1
         var score: Float
@@ -100,7 +100,7 @@ class SSVEPDetector(val targetFreqs: Array<Float>, SampRate: Float, private val 
         this.state = DetectorState.BASELINE
         this.BLSampCount = 0
         for (i in this.FreqCF.indices){
-            this.FreqCF[i] = 0.0
+            this.FreqCF[i] = 0.0f
         }
     }
 
