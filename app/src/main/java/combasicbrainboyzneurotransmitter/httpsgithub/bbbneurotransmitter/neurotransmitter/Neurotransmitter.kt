@@ -66,6 +66,7 @@ class NeurotransmitterHandler {
     }
 
     fun establishBluetoothConnection(){
+
         mBluetoothThread?.establishESPConnection()
         mBluetoothThread?.setCollecting(true)
 
@@ -73,7 +74,8 @@ class NeurotransmitterHandler {
 
     fun startSSVEPDetection(){
         mBluetoothThread?.sendMessageToESP("Ready")
-        mBluetoothThread?.run()
+        mBluetoothThread?.start()
+      //  mBluetoothThread?.run()
     }
 
     // Can probably let main start right away after calling configure

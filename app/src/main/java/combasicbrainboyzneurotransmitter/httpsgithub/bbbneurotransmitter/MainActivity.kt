@@ -71,6 +71,7 @@ class MainActivity : AppCompatActivity() {
 
         configureStartButton()
         logMessage("Ready to start operating....")
+
     }
 
     fun stimuliOnePresent(){
@@ -199,9 +200,11 @@ class MainActivity : AppCompatActivity() {
         mConnectionStart = findViewById(R.id.make_connection)
 
         mConnectionStart?.setOnClickListener({
+            logMessage("Waiting for Connection...")
             mNTHandler?.establishBluetoothConnection()
+            logMessage("Connection Established")
             mNTHandler?.startSSVEPDetection()
-            logMessage("Running")
+            logMessage("Running Algorithm")
         })
     }
 }

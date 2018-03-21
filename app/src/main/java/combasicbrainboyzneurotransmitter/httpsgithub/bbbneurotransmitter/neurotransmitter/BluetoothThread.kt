@@ -2,6 +2,7 @@ package combasicbrainboyzneurotransmitter.httpsgithub.bbbneurotransmitter.neurot
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
 import android.os.Handler
 import android.os.Message
@@ -23,6 +24,7 @@ class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread()
     private var mDetectionHandler: Handler? = null
     private var mBTAdapter: BluetoothAdapter? = null
     private var mNTHandler: Handler? = null
+    private var mBTServerSocket: BluetoothServerSocket? = null
     private var mBTSocket: BluetoothSocket? = null
 
     private var mSamplesIndex: Int = 0
@@ -44,10 +46,13 @@ class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread()
         mBTAdapter = BluetoothAdapter.getDefaultAdapter()
 
         if(mBTAdapter != null){
-            val device: BluetoothDevice? = mBTAdapter?.getRemoteDevice(ESP_mac_address)
+           // val device: BluetoothDevice? = mBTAdapter?.getRemoteDevice(ESP_mac_address)
 
             try{
-                mBTSocket = device?.createRfcommSocketToServiceRecord(ESP_UUID)
+                mBTServerSocket = mBTAdapter?.listenUsingRfcommWithServiceRecord("NeurotansmitterApp",ESP_UUID)
+                mBTSocket = mBTServerSocket?.accept()
+                mBTServerSocket?.close()
+
             }
             catch (e: IOException){
                 val btIoException = "Error: Cannot Create Socket for ESP32"
@@ -58,6 +63,7 @@ class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread()
 
             mBTAdapter?.cancelDiscovery()
 
+            /*
             try{
                 mBTSocket?.connect()
             }
@@ -69,7 +75,7 @@ class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread()
 
                 mBTSocket?.close()
             }
-
+            */
             try{
                 mESPOutputStream =  mBTSocket?.outputStream
             }
@@ -115,7 +121,9 @@ class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread()
         var sampleBuffer = ByteArray(2)
         var availableBytes: Int
 
+
         while(mCollectData){
+
             if(mSamplesIndex < 511) {
 
                 // read in needed number of samples
@@ -137,18 +145,21 @@ class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread()
                     mNTHandler?.sendMessage(btReadError)
                 }
             }
-            else { // Have needed 512 samples
+            else { // Have needed 512 samples'
+                sendMessageToESP("FFTGO")
                 var detectionDataMessage: Message?
                 detectionDataMessage = Message.obtain(mDetectionHandler, SSVEP_DATA, mSamples)
                 mDetectionHandler?.sendMessage(detectionDataMessage)
 
                 val elements: List<Float> = mSamples.takeLast(452)
+
                 val tempSamples: FloatArray = elements.toFloatArray()
                 val tempZeros: FloatArray = FloatArray(60)
                 val newSamples: FloatArray = tempSamples.plus(tempZeros)
                 mSamples = newSamples
 
                 mSamplesIndex = 451
+
             }
         }
     }
