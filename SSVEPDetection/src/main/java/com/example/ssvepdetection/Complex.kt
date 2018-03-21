@@ -7,19 +7,24 @@ package com.example.ssvepdetection
  */
 
 
-import java.lang.Math.*
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.cosh
+import kotlin.math.sinh
+import kotlin.math.sqrt
+import kotlin.math.pow
+import kotlin.math.abs
 
-
-class Complex(val re: Double, val im: Double) {
+class Complex(val re: Float, val im: Float) {
 
     operator infix fun plus(x: Complex) = Complex(re + x.re, im + x.im)
     operator infix fun minus(x: Complex) = Complex(re - x.re, im - x.im)
-    operator infix fun times(x: Double) = Complex(re * x, im * x)
+    operator infix fun times(x: Float) = Complex(re * x, im * x)
     operator infix fun times(x: Complex) = Complex(re * x.re - im * x.im, re * x.im + im * x.re)
-    operator infix fun div(x: Double) = Complex(re / x, im / x)
+    operator infix fun div(x: Float) = Complex(re / x, im / x)
 
     val exp: Complex by lazy { Complex(cos(im), sin(im)) * (cosh(re) + sinh(re)) }
-    val mag: Double by lazy {Math.sqrt(Math.pow(re,2.0) + Math.pow(im,2.0))}
+    val mag: Float by lazy {sqrt(re.pow(2) + im.pow(2))}
 
     override fun toString() = when {
         b == "0.000" -> a

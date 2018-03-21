@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.os.Handler
+import android.os.Message
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -14,7 +15,7 @@ import java.util.*
  * Created by root on 24/02/18.
  */
 
-class BluetoothThread: Thread(){
+class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread(){
     private var mESPInputStream: InputStream? = null
     private var mESPOutputStream: OutputStream? = null
 
@@ -34,7 +35,7 @@ class BluetoothThread: Thread(){
         private const val ESP_mac_address = "30:AE:A4:2C:A4:96"
     }
 
-    fun BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?){
+    init {
         mDetectionHandler = detectionHandler
         mNTHandler = ntHandler
     }
@@ -50,7 +51,8 @@ class BluetoothThread: Thread(){
             }
             catch (e: IOException){
                 val btIoException = "Error: Cannot Create Socket for ESP32"
-                val btSocketError = mNTHandler?.obtainMessage(INFO_MESSAGE, btIoException)
+                var btSocketError: Message?
+                btSocketError = Message.obtain(mNTHandler, INFO_MESSAGE, btIoException)
                 mNTHandler?.sendMessage(btSocketError)
             }
 
@@ -61,7 +63,8 @@ class BluetoothThread: Thread(){
             }
             catch (e: IOException){
                 val btConnectException = "Error: Connection to ESP32 Failed"
-                val btConnectError = mNTHandler?.obtainMessage(INFO_MESSAGE, btConnectException)
+                var btConnectError: Message?
+                btConnectError = Message.obtain(mNTHandler, INFO_MESSAGE, btConnectException)
                 mNTHandler?.sendMessage(btConnectError)
 
                 mBTSocket?.close()
@@ -72,7 +75,8 @@ class BluetoothThread: Thread(){
             }
             catch (e: IOException){
                 val btOutputException = "Error: ESP32 Output Stream Generation Failed"
-                val btOutputError = mNTHandler?.obtainMessage(INFO_MESSAGE, btOutputException)
+                var btOutputError: Message?
+                btOutputError = Message.obtain(mNTHandler, INFO_MESSAGE, btOutputException)
                 mNTHandler?.sendMessage(btOutputError)
             }
 
@@ -81,7 +85,8 @@ class BluetoothThread: Thread(){
             }
             catch (e: IOException){
                 val btInputException = "Error: ESP32 Input Stream Generation Failed"
-                val btInputError = mNTHandler?.obtainMessage(INFO_MESSAGE, btInputException)
+                var btInputError: Message?
+                btInputError = Message.obtain(mNTHandler, INFO_MESSAGE, btInputException)
                 mNTHandler?.sendMessage(btInputError)
 
             }
@@ -89,7 +94,8 @@ class BluetoothThread: Thread(){
         }
         else{
             val btNotEnabled = "ERROR: Bluetooth Not Enabled"
-            val btEnabledError = mNTHandler?.obtainMessage(INFO_MESSAGE, btNotEnabled)
+            var btEnabledError: Message?
+            btEnabledError = Message.obtain(mNTHandler, INFO_MESSAGE, btNotEnabled)
             mNTHandler?.sendMessage(btEnabledError)
         }
     }
@@ -106,9 +112,8 @@ class BluetoothThread: Thread(){
     }
 
     override fun run(){
-        var sampleBuffer: ByteArray = ByteArray(4)
-        var newSampleCount: Int = 0
-        var availableBytes: Int = 0
+        var sampleBuffer = ByteArray(2)
+        var availableBytes: Int
 
         while(mCollectData){
             if(mSamplesIndex < 511) {
@@ -117,42 +122,34 @@ class BluetoothThread: Thread(){
                 try {
                     availableBytes = mESPInputStream?.available() as Int
                     if (availableBytes > 1) {
-                        mESPInputStream?.read(sampleBuffer, 2, 2)
-                        // TODO TURN NEW BYTES INTO FLOAT
-                        // TODO APPEND TO FLOAT ARRAY
-                        // TODO INDEX NUMBER OF NEW SAMPLES
+                        mESPInputStream?.read(sampleBuffer, 0, 2)
 
                         val byteBuffer: ByteBuffer = ByteBuffer.wrap(sampleBuffer)
                         val newSampleShort: Short = byteBuffer.getShort(0)
                         val newSample: Float = newSampleShort.toFloat()
                         mSamples[mSamplesIndex] = newSample
+                        mSamplesIndex += 1
                     }
                 } catch (e: IOException) {
                     val btReadException = "Error: Reading Data From ESP32 Failed"
-                    val btReadError = mNTHandler?.obtainMessage(INFO_MESSAGE, btReadException)
+                    var btReadError: Message?
+                    btReadError = Message.obtain(mNTHandler, INFO_MESSAGE, btReadException)
                     mNTHandler?.sendMessage(btReadError)
                 }
             }
             else { // Have needed 512 samples
-                // Generate message for processing
-                // Send message
-                // Take last 512 - 60 samples from current floatArray
-                // Reset floatArray with said samples
-                // Set mHeldSamples to (512-60)
-
-                val detectionDataMessage = mDetectionHandler?.obtainMessage(SSVEP_DATA, mSamples)
+                var detectionDataMessage: Message?
+                detectionDataMessage = Message.obtain(mDetectionHandler, SSVEP_DATA, mSamples)
                 mDetectionHandler?.sendMessage(detectionDataMessage)
 
-                //val tempSamples: FloatArray = FloatArray(512)
-                //tempSamples(451, {i -> mSamples[i]})
-                //tempSamples[0-451] = mSamples[59-511] // TODO FIX THIS LOGIC
+                val elements: List<Float> = mSamples.takeLast(452)
+                val tempSamples: FloatArray = elements.toFloatArray()
+                val tempZeros: FloatArray = FloatArray(60)
+                val newSamples: FloatArray = tempSamples.plus(tempZeros)
+                mSamples = newSamples
+
                 mSamplesIndex = 451
-
             }
-
-            // if(enough data)
-            // make ssvepMessage: Message
-            // (SSVEP_MESSAGE, ssvepData: ______)
         }
     }
 
@@ -167,7 +164,8 @@ class BluetoothThread: Thread(){
             mESPOutputStream?.write(msgBuffer)
         } catch(e: IOException){
                 val btMessageException = "Error: Sending Message to ESP32 Failed"
-                val btMessageError = mNTHandler?.obtainMessage(INFO_MESSAGE, btMessageException)
+                val btMessageError: Message?
+                btMessageError = Message.obtain(mNTHandler, INFO_MESSAGE, btMessageException)
                 mNTHandler?.sendMessage(btMessageError)
         }
     }

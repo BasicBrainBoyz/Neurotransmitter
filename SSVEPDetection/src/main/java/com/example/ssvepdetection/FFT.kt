@@ -7,7 +7,6 @@ package com.example.ssvepdetection
  *
  * Code updated by BBB ltd. on 3/4/2018
  */
-
 object FFT {
     fun fft(a: Array<Complex>) = _fft(a, Complex(0.0f, 2.0f), 1.0f)
     fun inverseFFT(a: Array<Complex>) = _fft(a, Complex(0.0f, -2.0f), 2.0f)

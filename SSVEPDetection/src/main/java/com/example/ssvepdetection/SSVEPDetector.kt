@@ -1,10 +1,10 @@
 package com.example.ssvepdetection
 
-class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val WinSize: Int, private var fftNumPoints: Int) {
+class SSVEPDetector(val targetFreqs: FloatArray, SampRate: Float, private val WinSize: Int, private var fftNumPoints: Int) {
 
     var state = DetectorState.BASELINE
     private var freqIndex: Array<Int>
-    private var FreqCF: DoubleArray
+    private var FreqCF: FloatArray
     private var BLSampCount = 0
 
     //checking window size and fft size values
@@ -23,17 +23,17 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
 
     //Finding target frequencies indexes in the FFT output
     init {
-        val maxFreq = SampRate/2.0
+        val maxFreq = SampRate/2.0f
 
         // the second harmonic of all targets must be less than maxFreq
         require(targetFreqs.all( {freq -> 2*freq < maxFreq}), {"The second harmonic of all targets must be less than half the sample rate"})
 
         freqIndex = Array(targetFreqs.size, {i -> (targetFreqs[i]/maxFreq*fftNumPoints).toInt()})
-        FreqCF = DoubleArray(targetFreqs.size, {i -> 0.0})
+        FreqCF = FloatArray(targetFreqs.size, {i -> 0.0f})
 
     }
 
-    fun analyzeSample(data: DoubleArray): Double{
+    fun analyzeSample(data: FloatArray): Array<Boolean>{
         require(data.size == this.WinSize, {"Data size does not match the required size"})
 
         //Padding zeros and converting to complex
@@ -41,25 +41,25 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
 
         //Taking the FFt
         val Hdata = FFT.fft(dataPad)
-        val Hmag = DoubleArray(Hdata.size, {i-> Hdata[i].mag})
+        val Hmag = FloatArray(Hdata.size, {i-> Hdata[i].mag})
 
         //measuring targetFreq strengths
-        val freqStrength: DoubleArray
-        freqStrength = DoubleArray(this.targetFreqs.size, { i -> Hmag[this.freqIndex[i]] + Hmag[2*this.freqIndex[i]]})
+        val freqStrength: FloatArray
+        freqStrength = FloatArray(this.targetFreqs.size, { i -> Hmag[this.freqIndex[i]] + Hmag[2*this.freqIndex[i]]})
 
-        val fftMean: Double
-        fftMean = Hmag.average()
+        val fftMean: Float
+        fftMean = Hmag.average().toFloat()
 
         //what to do with FFT result
         if (this.state == DetectorState.BASELINE) {
             calcCF(freqStrength, fftMean)
-            return 0.0
+            return Array(this.FreqCF.size, {i -> false})
         }  else  {
             return findFreq(freqStrength, fftMean)
         }
     }
 
-    private fun calcCF(strengths: DoubleArray, average: Double){
+    private fun calcCF(strengths: FloatArray, average: Float){
 
         for ( i in this.targetFreqs.indices){
             //running average of CF
@@ -68,10 +68,12 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
         }
 
     }
-    private fun findFreq(strengths: DoubleArray, average: Double): Double {
-        var bestScore = 0.0
+    private fun findFreq(strengths: FloatArray, average: Float): Array<Boolean> {
+        var bestScore = 0.0f
         var bestIndex = 1
-        var score: Double
+        var score: Float
+
+        var result = Array(this.FreqCF.size, {i -> false})
 
         //find best score
         for (i in strengths.indices){
@@ -84,9 +86,10 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
 
         //is best strength big enough?
         if (bestScore < strengths.average()) {
-            return 0.0
+            return result //all false
         } else {
-            return this.targetFreqs[bestIndex]
+            result[bestIndex] = true
+            return result
         }
 
 
@@ -97,14 +100,12 @@ class SSVEPDetector(val targetFreqs: DoubleArray, SampRate: Double, private val 
         this.state = DetectorState.BASELINE
         this.BLSampCount = 0
         for (i in this.FreqCF.indices){
-            this.FreqCF[i] = 0.0
+            this.FreqCF[i] = 0.0f
         }
     }
 
 
 }
-
-
 
 enum class DetectorState {
     BASELINE, CLASSIFY
