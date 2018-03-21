@@ -24,6 +24,7 @@ class NeurotransmitterHandler {
         private const val SSVEP_DATA = 1
         private const val SSVEP_DETECTIONS: Int = 2
         private const val SSVEP_BASELINES: Int = 3
+        private const val DETECTIONS_MESSAGE: Int = 4
     }
 
     fun generateHandler(looper: Looper){
@@ -31,11 +32,15 @@ class NeurotransmitterHandler {
             override fun handleMessage(msg: Message?) {
                 when(msg?.what){
                     INFO_MESSAGE -> {
-                        mMainHandler?.sendMessage(msg)
+                        val messageObject = msg.obj as String
+                        val message = Message.obtain(mMainHandler, INFO_MESSAGE, messageObject)
+                        mMainHandler?.sendMessage(message)
                     }
                     SSVEP_DATA -> {}
                     SSVEP_DETECTIONS -> {
-                        mMainHandler?.sendMessage(msg)
+                        val messageObject = msg.obj as Detections
+                        val message = Message.obtain(mMainHandler, SSVEP_DETECTIONS, messageObject)
+                        mMainHandler?.sendMessage(message)
                     }
                     SSVEP_BASELINES -> {
                         if(mRequestedBaselineRuns == 0){
@@ -44,6 +49,11 @@ class NeurotransmitterHandler {
                         else{
                             mRequestedBaselineRuns -= 1
                         }
+                    }
+                    DETECTIONS_MESSAGE -> {
+                        val messageObject = msg.obj as String
+                        val message = Message.obtain(mMainHandler, DETECTIONS_MESSAGE, messageObject)
+                        mMainHandler?.sendMessage(message)
                     }
                 }
             }

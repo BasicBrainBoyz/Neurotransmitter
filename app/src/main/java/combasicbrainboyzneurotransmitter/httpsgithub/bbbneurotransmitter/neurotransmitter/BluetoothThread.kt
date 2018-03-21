@@ -29,6 +29,7 @@ class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread()
 
     private var mSamplesIndex: Int = 0
     private var mSamples: FloatArray = FloatArray(512)
+    private val mADCSlope: Float = 0.0001221f
 
     companion object {
         private const val INFO_MESSAGE = 0
@@ -135,7 +136,8 @@ class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread()
                         val byteBuffer: ByteBuffer = ByteBuffer.wrap(sampleBuffer)
                         val newSampleShort: Short = byteBuffer.getShort(0)
                         val newSample: Float = newSampleShort.toFloat()
-                        mSamples[mSamplesIndex] = newSample
+                        val correctedSample: Float = (((newSample*mADCSlope)-1.65f)*2.0f)
+                        mSamples[mSamplesIndex] = correctedSample
                         mSamplesIndex += 1
                     }
                 } catch (e: IOException) {

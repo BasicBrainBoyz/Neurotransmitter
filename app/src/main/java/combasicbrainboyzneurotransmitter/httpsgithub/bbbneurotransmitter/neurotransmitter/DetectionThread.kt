@@ -20,11 +20,15 @@ class DetectionHandler {
     private var mInputSize: Int = 0
     private var mFFTOutputPoints: Int = 0
     private var mBaselineAverageCount: Int = 0
+    private var mMessageId = 0
+    private var mDetectionsId = 0
 
     companion object {
+        private const val INFO_MESSAGE = 0
         private const val SSVEP_DATA: Int = 1
         private const val SSVEP_DETECTIONS: Int = 2
         private const val SSVEP_BASELINES: Int = 3
+        private const val DETECTIONS_MESSAGE: Int = 4
     }
 
     fun generateHandler(looper: Looper){
@@ -33,6 +37,10 @@ class DetectionHandler {
             // take data and perform FFT
                 when (msg?.what) {
                     SSVEP_DATA -> {
+                        val message = "Received Data for FFT" + " " + mDetectionsId.toString()
+                        mDetectionsId += 1
+                        val infoMessage: Message = Message.obtain(mNTHandler, DETECTIONS_MESSAGE, message)
+                        infoMessage.sendToTarget()
                         analyzeSample(msg.obj as FloatArray)
                     }
                 }
@@ -102,7 +110,9 @@ class DetectionHandler {
             mNTHandler?.sendMessage(baselineMessage)
         } else {
             val detections: BooleanArray = findFrequencies(freqStrength, fftMean)
-            val detectionsMessage = mNTHandler?.obtainMessage(SSVEP_DETECTIONS, detections)
+            val currentDetections = Detections(detections, mMessageId)
+            mMessageId += 1
+            val detectionsMessage = mNTHandler?.obtainMessage(SSVEP_DETECTIONS, currentDetections)
             mNTHandler?.sendMessage(detectionsMessage)
         }
     }
@@ -155,6 +165,7 @@ enum class DetectionState {
     BASELINE, CLASSIFY
 }
 
+data class Detections(val detects: BooleanArray, val messageId: Int)
 
 
 

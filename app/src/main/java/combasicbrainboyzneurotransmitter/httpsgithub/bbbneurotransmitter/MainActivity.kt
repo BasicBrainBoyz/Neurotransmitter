@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.KeyEvent
 import android.widget.ImageView
 import android.widget.TextView
+import combasicbrainboyzneurotransmitter.httpsgithub.bbbneurotransmitter.neurotransmitter.Detections
 import combasicbrainboyzneurotransmitter.httpsgithub.bbbneurotransmitter.neurotransmitter.NeurotransmitterHandler
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         //private const val SSVEP_DATA = 1
         private const val SSVEP_DETECTIONS: Int = 2
         //private const val SSVEP_BASELINES: Int = 3
+        private const val DETECTIONS_MESSAGE: Int = 4
 
         private val stimuliFreqs: FloatArray = floatArrayOf(12.0f, 20.0f, 30.0f)
         private val samplingFreq: Float = 250.0f
@@ -34,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private var mRightStimuli: ImageView? = null
     private var mTrackText: ImageView? = null
     private var mInfoText: TextView? = null
+    private var mDetectionsText: TextView? = null
     private var mConnectionStart: ImageView? = null
 
     private var mAudioPlay: ImageView? = null
@@ -58,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         mAudioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         mInfoText = findViewById(R.id.info_text)
+        mDetectionsText = findViewById(R.id.detections_text)
 
         logMessage("Configuring graphics...")
         retrieveStimuli()
@@ -117,6 +121,10 @@ class MainActivity : AppCompatActivity() {
         mInfoText?.setText(message.toCharArray(), 0, message.length)
     }
 
+    fun logDetectionsMessage(message: String){
+        mDetectionsText?.setText(message.toCharArray(), 0, message.length)
+    }
+
     private fun retrieveStimuli(){
         mLeftStimuli = findViewById(R.id.stimuli_left)
         mMiddleStimuli = findViewById(R.id.stimuli_middle)
@@ -174,12 +182,32 @@ class MainActivity : AppCompatActivity() {
                         logMessage(message)
                     }
                     SSVEP_DETECTIONS -> {
-                        val detections: BooleanArray = msg.obj as BooleanArray
+                        val detections: Detections = msg.obj as Detections
                         when {
-                            detections[0] -> stimuliOnePresent()
-                            detections[1] -> stimuliTwoPresent()
-                            detections[2] -> stimuliThreePresent()
+                            detections.detects[0] -> {
+                                val message = detections.detects[0].toString() + " " + detections.detects[1].toString() + " " + detections.detects[2].toString() + " " + detections.messageId.toString()
+                                logMessage(message)
+                                stimuliOnePresent() }
+                            detections.detects[1] -> {
+                                val message = detections.detects[0].toString() + " " + detections.detects[1].toString() + " " + detections.detects[2].toString() + " " + detections.messageId.toString()
+                                logMessage(message)
+                                stimuliTwoPresent()
+                            }
+                            detections.detects[2] -> {
+                                val message = detections.detects[0].toString() + " " + detections.detects[1].toString() + " " + detections.detects[2].toString() + " " + detections.messageId.toString()
+                                logMessage(message)
+                                stimuliThreePresent()
+                            }
+                            else -> {
+                                val message = detections.detects[0].toString() + " " + detections.detects[1].toString() + " " + detections.detects[2].toString() + " " + detections.messageId.toString()
+                                logMessage(message)
+                                stimuliThreePresent()
+                            }
                         }
+                    }
+                    DETECTIONS_MESSAGE -> {
+                       val text = msg.obj as String
+                        logDetectionsMessage(text)
                     }
                 }
             }
