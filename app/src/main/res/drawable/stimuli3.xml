@@ -6,6 +6,7 @@
     <group>
         <path
             android:name="stimuliThree"
+            android:fillAlpha="1"
             android:fillColor="#FF69FFFF"
             android:pathData="M6,6h12v12H6z"/>
     </group>

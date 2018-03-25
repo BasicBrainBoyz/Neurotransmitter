@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         //private const val SSVEP_BASELINES: Int = 3
         private const val DETECTIONS_MESSAGE: Int = 4
 
-        private val stimuliFreqs: FloatArray = floatArrayOf(12.0f, 20.0f, 30.0f)
+        private val stimuliFreqs: FloatArray = floatArrayOf(11.905f, 20.0f, 15.156f)
         private val samplingFreq: Float = 250.0f
         private val inputSize: Int = 512
         private val fftOutputPoints: Int = 1024
