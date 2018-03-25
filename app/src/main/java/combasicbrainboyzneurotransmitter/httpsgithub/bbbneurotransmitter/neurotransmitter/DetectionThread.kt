@@ -86,7 +86,7 @@ class DetectionHandler {
         // the second harmonic of all targets must be less than maxFreq
         require(mStimuliFreqs.all( {freq -> 2*freq < maxFreq}), {"The second harmonic of all targets must be less than half the sample rate"})
 
-        mFreqIndexes = IntArray(targetFreqs.size, {i -> (targetFreqs[i]/maxFreq*mFFTOutputPoints).toInt()+1})
+        mFreqIndexes = IntArray(targetFreqs.size, {i -> (targetFreqs[i]/maxFreq*mFFTOutputPoints + 0.5f).toInt()})
         mFreqCoefficients = FloatArray(targetFreqs.size, {i -> 0.0f})
 
         mFFT_Calculator = FloatFFT_1D(mFFTOutputPoints.toLong())
