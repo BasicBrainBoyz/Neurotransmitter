@@ -1,0 +1,10 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/bluetooth_connection">
+
+    <target
+        android:animation="@animator/feedback_flash"
+        android:name="makeConnection"
+        />
+
+</animated-vector>

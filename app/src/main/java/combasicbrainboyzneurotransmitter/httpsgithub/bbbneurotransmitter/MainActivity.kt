@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         private const val SSVEP_DETECTIONS: Int = 2
         //private const val SSVEP_BASELINES: Int = 3
         private const val DETECTIONS_MESSAGE: Int = 4
+        private const val START_OPERATING: Int = 5
 
         private val stimuliFreqs: FloatArray = floatArrayOf(11.905f, 20.0f, 15.156f)
         private val samplingFreq: Float = 250.0f
@@ -38,8 +39,10 @@ class MainActivity : AppCompatActivity() {
     private var mInfoText: TextView? = null
     private var mDetectionsText: TextView? = null
     private var mConnectionStart: ImageView? = null
+    private var mConnectionAttempted: Boolean = false
 
     private var mAudioPlay: ImageView? = null
+    private var mAudioPause: ImageView? = null
     private var mAudioSkipFwd: ImageView? = null
     private var mAudioSkipBack: ImageView? = null
 
@@ -79,6 +82,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun stimuliOnePresent(){
+        val skipBack: Drawable? = mAudioSkipBack?.drawable
+        if(skipBack is Animatable){
+            skipBack.start()
+        }
+
         var eventTime = (SystemClock.uptimeMillis() - 1)
         val audioSkipBackDown: KeyEvent? = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS, 0)
         mAudioManager?.dispatchMediaKeyEvent(audioSkipBackDown)
@@ -88,7 +96,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun stimuliTwoPresent(){
+        val audioPause = mAudioPause?.drawable
+        val audioPlay = mAudioPlay?.drawable
+
         if(!mAudioPlaying) {
+            audioPlay?.alpha = 0
+            audioPause?.alpha = 255
+
+            if(audioPause is Animatable){
+                audioPause?.start()
+            }
+
             var eventTime = (SystemClock.uptimeMillis() - 1)
             val audioPlayDown: KeyEvent? = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY, 0)
             mAudioManager?.dispatchMediaKeyEvent(audioPlayDown)
@@ -98,6 +116,13 @@ class MainActivity : AppCompatActivity() {
             mAudioPlaying = true
         }
         else{
+            audioPlay?.alpha = 255
+            audioPause?.alpha = 0
+
+            if(audioPlay is Animatable){
+                audioPlay?.start()
+            }
+
             var eventTime = (SystemClock.uptimeMillis() - 1)
             val audioPauseDown: KeyEvent? = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE, 0)
             mAudioManager?.dispatchMediaKeyEvent(audioPauseDown)
@@ -109,6 +134,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun stimuliThreePresent(){
+        val skipFwd: Drawable? = mAudioSkipFwd?.drawable
+        if(skipFwd is Animatable){
+            skipFwd.start()
+        }
+
         var eventTime = (SystemClock.uptimeMillis() - 1)
         val audioSkipBackDown: KeyEvent? = KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT, 0)
         mAudioManager?.dispatchMediaKeyEvent(audioSkipBackDown)
@@ -157,8 +187,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun retrieveAudioControls(){
         mAudioPlay = findViewById(R.id.play)
+        mAudioPause = findViewById(R.id.pause)
         mAudioSkipFwd = findViewById(R.id.skip_fwd)
         mAudioSkipBack = findViewById(R.id.skip_back)
+
+        val pause = mAudioPause?.drawable
+        pause?.alpha = 0
 
         mAudioPlay?.setOnClickListener({
             stimuliTwoPresent()
@@ -228,11 +262,19 @@ class MainActivity : AppCompatActivity() {
         mConnectionStart = findViewById(R.id.make_connection)
 
         mConnectionStart?.setOnClickListener({
-            logMessage("Waiting for Connection...")
-            mNTHandler?.establishBluetoothConnection()
-            logMessage("Connection Established")
-            mNTHandler?.startSSVEPDetection()
-            logMessage("Running Algorithm")
+            if(!mConnectionAttempted) {
+                val connection: Drawable? = mConnectionStart?.drawable
+
+                connection?.alpha = 0
+
+                val ntHandler = mNTHandler?.getHandler()
+                val startMessage = Message.obtain(ntHandler, START_OPERATING)
+                ntHandler?.sendMessage(startMessage)
+
+                logMessage("Running Algorithm")
+
+                mConnectionAttempted = true
+            }
         })
     }
 }

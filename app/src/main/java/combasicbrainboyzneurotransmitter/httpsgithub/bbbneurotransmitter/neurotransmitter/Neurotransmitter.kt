@@ -25,6 +25,7 @@ class NeurotransmitterHandler {
         private const val SSVEP_DETECTIONS: Int = 2
         private const val SSVEP_BASELINES: Int = 3
         private const val DETECTIONS_MESSAGE: Int = 4
+        private const val START_OPERATING: Int = 5
     }
 
     fun generateHandler(looper: Looper){
@@ -55,6 +56,10 @@ class NeurotransmitterHandler {
                         val message = Message.obtain(mMainHandler, DETECTIONS_MESSAGE, messageObject)
                         mMainHandler?.sendMessage(message)
                     }
+                    START_OPERATING -> {
+                        establishBluetoothConnection()
+                        startSSVEPDetection()
+                    }
                 }
             }
         }
@@ -69,6 +74,10 @@ class NeurotransmitterHandler {
         mDetectionHandler.setNTHandler(mHandler as Handler)
         mDetectionHandler.generateHandler(mDetectionThread.looper)
         mBluetoothThread = BluetoothThread(mHandler, mDetectionHandler.getHandler())
+    }
+
+    fun getHandler(): Handler?{
+        return mHandler
     }
 
     fun configureAlgorithm(targetFreqs: FloatArray, sampleRate: Float, inputSize: Int, fftOutputPoints: Int) {
