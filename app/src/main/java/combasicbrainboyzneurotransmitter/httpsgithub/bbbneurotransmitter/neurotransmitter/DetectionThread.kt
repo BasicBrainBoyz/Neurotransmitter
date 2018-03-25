@@ -4,6 +4,9 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.support.annotation.FloatRange
+import org.jtransforms.fft.FloatFFT_1D
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * Created by root on 24/02/18.
@@ -22,6 +25,8 @@ class DetectionHandler {
     private var mBaselineAverageCount: Int = 0
     private var mMessageId = 0
     private var mDetectionsId = 0
+    private var mFFT_Calculator: FloatFFT_1D? = null
+
 
     companion object {
         private const val INFO_MESSAGE = 0
@@ -81,19 +86,21 @@ class DetectionHandler {
         // the second harmonic of all targets must be less than maxFreq
         require(mStimuliFreqs.all( {freq -> 2*freq < maxFreq}), {"The second harmonic of all targets must be less than half the sample rate"})
 
-        mFreqIndexes = IntArray(targetFreqs.size, {i -> (targetFreqs[i]/maxFreq*mFFTOutputPoints).toInt()})
+        mFreqIndexes = IntArray(targetFreqs.size, {i -> (targetFreqs[i]/maxFreq*mFFTOutputPoints).toInt()+1})
         mFreqCoefficients = FloatArray(targetFreqs.size, {i -> 0.0f})
+
+        mFFT_Calculator = FloatFFT_1D(mFFTOutputPoints.toLong())
     }
 
     private fun analyzeSample(data: FloatArray){
         require(data.size == this.mInputSize, {"Data size does not match the required size"})
-
+        val dataMean = data.average().toFloat()
         //Padding zeros and converting to complex
-        val dataPad = FFT.prepData(data, this.mFFTOutputPoints)
+        var dataPad: FloatArray = FloatArray(this.mFFTOutputPoints, {i -> if (i < data.size) data[i] - dataMean else 0.0f})
 
         //Taking the FFt
-        val hData = FFT.fft(dataPad)
-        val hMag = FloatArray(hData.size, {i-> hData[i].mag})
+        mFFT_Calculator?.realForward(dataPad)
+        val hMag = FloatArray(dataPad.size/2, {i->  sqrt(dataPad[2*i].pow(2.0f) + dataPad[2*i+1].pow(2.0f)) })
 
         //measuring targetFreq strengths
         val freqStrength: FloatArray
@@ -121,8 +128,9 @@ class DetectionHandler {
         for ( i in this.mStimuliFreqs.indices){
             //running average of CF
             this.mFreqCoefficients[i] = (this.mFreqCoefficients[i]*this.mBaselineAverageCount + strengths[i]/average)/(this.mBaselineAverageCount+1)
-            this.mBaselineAverageCount = this.mBaselineAverageCount + 1
+
         }
+         this.mBaselineAverageCount = this.mBaselineAverageCount + 1
     }
 
     private fun findFrequencies(strengths: FloatArray, average: Float): BooleanArray {

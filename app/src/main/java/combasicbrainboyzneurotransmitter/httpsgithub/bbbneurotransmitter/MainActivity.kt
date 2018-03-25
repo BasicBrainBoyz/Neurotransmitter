@@ -201,7 +201,7 @@ class MainActivity : AppCompatActivity() {
                             else -> {
                                 val message = detections.detects[0].toString() + " " + detections.detects[1].toString() + " " + detections.detects[2].toString() + " " + detections.messageId.toString()
                                 logMessage(message)
-                                stimuliThreePresent()
+
                             }
                         }
                     }

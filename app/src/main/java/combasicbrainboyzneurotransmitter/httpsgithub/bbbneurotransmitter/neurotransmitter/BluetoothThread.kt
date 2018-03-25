@@ -10,6 +10,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.*
 
 /**
@@ -134,6 +135,7 @@ class BluetoothThread(ntHandler: Handler?, detectionHandler: Handler?): Thread()
                         mESPInputStream?.read(sampleBuffer, 0, 2)
 
                         val byteBuffer: ByteBuffer = ByteBuffer.wrap(sampleBuffer)
+                        byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
                         val newSampleShort: Short = byteBuffer.getShort(0)
                         val newSample: Float = newSampleShort.toFloat()
                         val correctedSample: Float = (((newSample*mADCSlope)-1.65f)*2.0f)

@@ -17,7 +17,7 @@ class NeurotransmitterHandler {
     private var mBluetoothThread: BluetoothThread? = null // need bluetooth device
     private var mDetectionThread = HandlerThread("detection", -10)
     private var mDetectionHandler: DetectionHandler = DetectionHandler()
-    private var mRequestedBaselineRuns: Int = 10
+    private var mRequestedBaselineRuns: Int = 40
 
     companion object {
         private const val INFO_MESSAGE = 0
